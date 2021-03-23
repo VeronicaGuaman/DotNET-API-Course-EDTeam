@@ -5,45 +5,78 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using newwebapi.Services;
 using Microsoft.AspNetCore.Cors;
+using newwebapi.Context;
+using newwebapi.Models;
 
-namespace  newwebapi.Controllers
+namespace newwebapi.Controllers
 {   
     [EnableCors("MyPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        IUserDataService userDataService;
-    public UserController(IUserDataService userData)
-    {
-        userDataService = userData;
-    }
+        private ApiAppContext _context;
+        public UserController(ApiAppContext context)
+        {
+            _context = context;
+            _context.Database.EnsureCreated();
+        }
 
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        public ActionResult<IEnumerable<User>> Get()
         {
-            return userDataService.GetValues();
+            return _context.Users.Where(p => p.Active).ToList();
         }
 
         [HttpGet("{id}")]
-        public ActionResult<IEnumerable<string>> Get([FromServices] IUserDataService dataService)
+        public ActionResult<string> Get(string id)
         {
-            return userDataService.GetValues().Union(dataService.GetValues()).ToList();
+            Guid.TryParse(id, out var userId);
+            if(userId != Guid.Empty)
+            {
+                var userFound = _context.Users.FirstOrDefault(p => p.UserId == userId);
+                if(userFound != null)  return Ok(userFound);
+                else return BadRequest();
+            }            
+            else{
+                return NotFound();
+            }
         }
 
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task Post([FromBody] User user)
         {
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
         }
 
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void Put(string id, [FromBody] User user)
         {
+            Guid.TryParse(id, out var userId);
+            if(userId != Guid.Empty)
+            {
+                var userFound = _context.Users.FirstOrDefault(p => p.UserId == userId);
+                if(userFound != null)
+                {
+                    userFound.Name = user.Name;
+                    userFound.LastName = user.LastName;
+                    userFound.Active = user.Active;
+                }
+            }
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+        public async Task Delete(string id)
+        {     
+            Guid.TryParse(id, out var userId);
+            if(userId != Guid.Empty)
+            {       
+            var userFound = _context.Users.FirstOrDefault(p => p.UserId == userId);
+            _context.Users.Remove(userFound);            
+            await _context.SaveChangesAsync();
+            }
         }
+
     }
 }
