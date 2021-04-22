@@ -16,6 +16,7 @@ using newwebapi.Services;
 using newwebapi.MiddleWares;
 using newwebapi.Context;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace newwebapi
 {
@@ -32,7 +33,8 @@ namespace newwebapi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options=> 
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);;
             services.AddScoped<IUserDataService, UserDataService>();
             services.AddCors(p => 
             {
@@ -50,8 +52,12 @@ namespace newwebapi
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "newwebapi", Version = "v1" });
             });
             
+            // services.AddDbContext<ApiAppContext>(options =>
+            //        options.UseInMemoryDatabase("AppDB"));
             services.AddDbContext<ApiAppContext>(options =>
-                   options.UseInMemoryDatabase("AppDB"));
+                   options.UseSqlServer(Configuration.GetConnectionString("Data Source=localhost;Initial Catalog=ApiDotNetCore;Integrated Security=SSPI;")));
+
+            services.AddResponseCaching();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +73,7 @@ namespace newwebapi
 
             // app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseResponseCaching();
             app.UseCors();            
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>

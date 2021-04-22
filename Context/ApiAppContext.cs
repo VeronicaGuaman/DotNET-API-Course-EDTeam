@@ -10,6 +10,7 @@ namespace newwebapi.Context
     public class ApiAppContext : DbContext
     {
         public DbSet<User> Users {get; set;}
+        public DbSet<UserRole> UserRoles {get; set;}
          
         public ApiAppContext(DbContextOptions<ApiAppContext> options) : base(options) { }
         
@@ -25,6 +26,17 @@ namespace newwebapi.Context
 
             builder.Entity<User>().ToTable("User").HasData(userInitData);
             builder.Entity<User>().HasKey(p => p.UserId);
+
+            builder.Entity<UserRole>().HasKey(p => p.UserRoleId);
+
+             List<UserRole> userRoles = new List<UserRole>();
+
+            userRoles.Add(new UserRole{Role= "Admin", UserId = userInitData[0].UserId});
+            userRoles.Add(new UserRole{Role = "User", UserId = userInitData[0].UserId});
+            userRoles.Add(new UserRole{Role = "Support", UserId = userInitData[1].UserId});
+
+            builder.Entity<UserRole>().ToTable("UserRole").HasData(userRoles);
+            builder.Entity<UserRole>().HasOne<User>("User");
         }
     }
 }

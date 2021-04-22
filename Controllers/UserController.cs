@@ -7,6 +7,7 @@ using newwebapi.Services;
 using Microsoft.AspNetCore.Cors;
 using newwebapi.Context;
 using newwebapi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace newwebapi.Controllers
 {   
@@ -23,9 +24,19 @@ namespace newwebapi.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration=60)]
         public ActionResult<IEnumerable<User>> Get()
         {
-            return _context.Users.Where(p => p.Active).ToList();
+            return _context.Users.Where(p => p.Active)
+            .Include(p=> p.UserRoles)
+            .ToList();
+        }
+
+        [HttpGet]
+        [Route("GetRoles")]
+        public ActionResult<IEnumerable<UserRole>> GetRoles()
+        {
+            return _context.UserRoles.Include(p => p.User).ToList();
         }
 
         [HttpGet("{id}")]

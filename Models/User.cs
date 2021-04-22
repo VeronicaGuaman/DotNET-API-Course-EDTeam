@@ -13,5 +13,7 @@ namespace newwebapi.Models
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         public bool Active { get; set; } = true;
+
+        public virtual ICollection<UserRole> UserRoles {get; set;}
     }
 }
