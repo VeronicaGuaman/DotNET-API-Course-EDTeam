@@ -18,7 +18,7 @@ namespace newwebapi.MiddleWares
         public async Task Invoke(HttpContext context)
         {
             await next(context);
-
+//Si hay algun registro dentro de la colección que tenga el valor Status
             if(context.Request.Query.Any(p => p.Key == "Status"))
             {
                 await context.Response.WriteAsync("Working...");
@@ -27,7 +27,7 @@ namespace newwebapi.MiddleWares
 
     }
 
-    public static class  StatusMiddleWarextension
+    public static class  StatusMiddleWareExtension
     {
         public static IApplicationBuilder UserStatusMiddleWare(this IApplicationBuilder builder)
         {
