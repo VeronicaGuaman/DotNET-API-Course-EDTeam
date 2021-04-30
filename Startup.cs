@@ -55,7 +55,7 @@ namespace newwebapi
             // services.AddDbContext<ApiAppContext>(options =>
             //        options.UseInMemoryDatabase("AppDB"));
             services.AddDbContext<ApiAppContext>(options =>
-                   options.UseSqlServer(Configuration.GetConnectionString("Data Source=localhost;Initial Catalog=ApiDotNetCore;Integrated Security=SSPI;")));
+                   options.UseSqlServer(@"Data Source=localhost;Initial Catalog=ApiDotNetCore;Integrated Security=SSPI;"));
 
             services.AddResponseCaching();
         }

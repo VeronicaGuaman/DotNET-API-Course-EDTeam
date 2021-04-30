@@ -73,6 +73,7 @@ namespace newwebapi.Controllers
                     userFound.Name = user.Name;
                     userFound.LastName = user.LastName;
                     userFound.Active = user.Active;
+                    _context.SaveChanges();
                 }
             }
         }

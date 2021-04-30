@@ -33,6 +33,7 @@ namespace newwebapi.Context
 
             userRoles.Add(new UserRole{Role= "Admin", UserId = userInitData[0].UserId});
             userRoles.Add(new UserRole{Role = "User", UserId = userInitData[0].UserId});
+            userRoles.Add(new UserRole{Role = "Support", UserId = userInitData[0].UserId});
             userRoles.Add(new UserRole{Role = "Support", UserId = userInitData[1].UserId});
 
             builder.Entity<UserRole>().ToTable("UserRole").HasData(userRoles);
