@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Cors;
 using newwebapi.Context;
 using newwebapi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNet.OData;
 
 namespace newwebapi.Controllers
 {   
@@ -24,12 +25,11 @@ namespace newwebapi.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration=60)]
-        public ActionResult<IEnumerable<User>> Get()
+        [EnableQuery]
+        public ActionResult<IQueryable<User>> Get()
         {
-            return _context.Users.Where(p => p.Active)
-            .Include(p=> p.UserRoles)
-            .ToList();
+            return Ok(_context.Users
+            .Where(p => p.Active));
         }
 
         [HttpGet]
@@ -40,6 +40,9 @@ namespace newwebapi.Controllers
         }
 
         [HttpGet("{id}")]
+        // [ProducesResponseType(StatusCode.)]
+        // [ProducesResponseType(StatusCode.Status400BadRequest)]
+        // [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<string> Get(string id)
         {
             Guid.TryParse(id, out var userId);

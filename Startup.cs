@@ -17,6 +17,11 @@ using newwebapi.MiddleWares;
 using newwebapi.Context;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData;
+using Microsoft.AspNet.OData.Builder;
+using newwebapi.Models;
+using Microsoft.OData.Edm;
 
 namespace newwebapi
 {
@@ -33,7 +38,11 @@ namespace newwebapi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers().AddNewtonsoftJson(options=> 
+            services.AddControllers( config =>
+            {
+            config.EnableEndpointRouting = false;
+            })
+            .AddNewtonsoftJson(options=> 
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);;
             services.AddScoped<IUserDataService, UserDataService>();
             services.AddCors(p => 
@@ -58,6 +67,7 @@ namespace newwebapi
                    options.UseSqlServer(@"Data Source=localhost;Initial Catalog=ApiDotNetCore;Integrated Security=SSPI;"));
 
             services.AddResponseCaching();
+            services.AddOData();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -75,16 +85,13 @@ namespace newwebapi
             app.UseRouting();
             app.UseResponseCaching();
             app.UseCors();            
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
+            //app.UseAuthorization();
+            app.UseMvc( routeBuilder =>
             {
-                endpoints.MapControllers();
-                endpoints.MapGet("/MyRoot", async context =>
-                {
-                    await context.Response.WriteAsync("Hola desde myRoot");
-                });
+                routeBuilder.Expand().Select().OrderBy().Filter();
+                routeBuilder.EnableDependencyInjection();
+                routeBuilder.MapODataServiceRoute("odata", "odata", GetEdmModel());
             });
-            
             app.UseWelcomePage();
             app.UserStatusMiddleWare();
 
@@ -92,6 +99,14 @@ namespace newwebapi
             // {
             //     await context.Response.WriteAsync("URL no encontrado");
             // });
+        }
+
+        IEdmModel GetEdmModel()
+        {
+            var odataBuilder = new ODataConventionModelBuilder();
+            odataBuilder.EntitySet<User>("USers");
+
+            return odataBuilder.GetEdmModel();
         }
     }
 }
